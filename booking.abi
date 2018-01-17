@@ -1,0 +1,136 @@
+{
+  "types": [],
+  "structs": [{
+      "name": "Id",
+      "base": "",
+      "fields": {
+        "owner": "account_name",
+        "number": "uint64"
+      }
+    },{
+      "name": "Token",
+      "base": "",
+      "fields": {
+        "quantity": "uint64"
+      }
+    },{
+      "name": "Hotel",
+      "base": "",
+      "fields": {
+        "id": "Id",
+        "id2": "uint128",
+        "balance": "Token",
+        "openOffers": "uint64",
+        "totalOffers": "uint64",
+        "openRequests": "uint64",
+        "totalRequests": "uint64"
+      }
+    },{
+      "name": "Offer",
+      "base": "",
+      "fields": {
+        "id": "Id",
+        "hotelId": "Id",
+        "roomInfo": "string",
+        "arrivalDate": "time",
+        "price": "Token"
+      }
+    },{
+      "name": "Request",
+      "base": "",
+      "fields": {
+        "id": "Id",
+        "offerId": "Id",
+        "pubKey": "string",
+        "charged": "uint8",
+        "chargeData": "string"
+      }
+    },{
+      "name": "Operation",
+      "base": "",
+      "fields": {
+        "initiatorHotel": "Id"
+      }
+    },{
+      "name": "CreateOffer",
+      "base": "Operation",
+      "fields": {
+        "roomInfo": "fixed_string32",
+        "arrivalDate": "time",
+        "price": "Token"
+      }
+    },{
+      "name": "CreateReq",
+      "base": "Operation",
+      "fields": {
+        "offerId": "Id",
+        "pubKey": "public_key"
+      }
+    },{
+      "name": "ChargeReq",
+      "base": "Operation",
+      "fields": {
+        "requestId": "Id",
+        "chargeData": "fixed_string32"
+      }
+    },{
+      "name": "RefundReq",
+      "base": "Operation",
+      "fields": {
+        "requestId": "Id"
+      }
+    }
+  ],
+  "actions": [{
+      "action_name": "createoffer",
+      "type": "CreateOffer"
+    },{
+      "action_name": "createreq",
+      "type": "CreateReq"
+    },{
+      "action_name": "chargereq",
+      "type": "ChargeReq"
+    },{
+      "action_name": "refundreq",
+      "type": "RefundReq"
+    }
+  ],
+  "tables": [{
+      "table_name": "hotel",
+      "index_type": "i128i128",
+      "key_names": [
+        "id",
+        "id2"
+      ],
+      "key_types": [
+        "Id",
+        "uint128"
+      ],
+      "type": "Hotel"
+    },{
+      "table_name": "offer",
+      "index_type": "i128i128",
+      "key_names": [
+        "id",
+        "hotelId"
+      ],
+      "key_types": [
+        "Id",
+        "Id"
+      ],
+      "type": "Offer"
+    },{
+      "table_name": "request",
+      "index_type": "i128i128",
+      "key_names": [
+        "id",
+        "offerId"
+      ],
+      "key_types": [
+        "Id",
+        "Id"
+      ],
+      "type": "Request"
+    }
+  ]
+}
