@@ -20,3 +20,5 @@ Open research prototype of booking system, based on EOS blockchain engine
   ``` bash 
   eoscpp -o booking.wast booking.cpp
   ```
+ ## deploy 
+ https://github.com/EOSIO/eos/wiki/Smart%20Contract#6-deploy-and-update-smart-contract
