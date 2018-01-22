@@ -13,34 +13,38 @@ namespace booking {
 
 using Token = eosio::token<uint64_t, N(Books)>;
 
+using HotelId = uint32_t;
+using HotelIdI64 = uint64_t;
+
 struct Id
 {
-    account_name owner;
-    uint64_t number;
+    HotelId hotelId;
+    uint32_t number;
 
     void print() {
-        eosio::print(   "{ owner: ", owner,
+        eosio::print(   "{ hotelId: ", hotelId,
                         ", number: ", number, " }");
     }
 };
 
 
-//@abi table i128i128
+//@abi table i64
 struct Hotel
 {
-    Id id;
-    uint128_t id2;  //megakostyl, can't create table with one i128 idx
+    HotelIdI64 id;
 
+    account_name owner;
     Token balance;
 
-    uint64_t openOffers = 0u;
-    uint64_t totalOffers = 0u;
+    uint32_t openOffers = 0u;
+    uint32_t totalOffers = 0u;
 
-    uint64_t openRequests = 0u;
-    uint64_t totalRequests = 0u;
+    uint32_t openRequests = 0u;
+    uint32_t totalRequests = 0u;
 
     void print() {
         eosio::print(   "{ id: ", id,
+                        ", owner: ", owner,
                         ", balance: ", balance,
                         ", openOffers: ", openOffers,
                         ", totalOffers: ", totalOffers,
@@ -49,15 +53,14 @@ struct Hotel
     }
 };
 
-using Hotels = eosio::table<N(booking), N(booking), N(Hotels), Hotel, Id, uint128_t>;
+using Hotels = eosio::table<N(booking), N(booking), N(hotel), Hotel, HotelIdI64>;
 using HotelsById = Hotels::primary_index;
 
 
-//@abi table i128i128
+//@abi table i64
 struct Offer
 {
     Id id;
-    Id hotelId;
 
     eosio::string roomInfo;
     time arrivalDate;
@@ -65,25 +68,23 @@ struct Offer
 
     void print() {
         eosio::print(   "{ id: ", id,
-                        ", hotelId: ", hotelId,
                         ", roomInfo: ", roomInfo,
                         ", arrivalDate: ", arrivalDate,
                         ", price: ", price, " }");
     }
 };
 
-using Offers = eosio::table<N(booking), N(booking), N(Offers), Offer, Id, Id>;
+using Offers = eosio::table<N(booking), N(booking), N(offer), Offer, Id>;
 using OffersById = Offers::primary_index;
-using OffersByHotelId = Offers::secondary_index;
 
 
-//@abi table i128i128
+//@abi table i64
 struct Request {
     Id id;
     Id offerId;
 
     eosio::string pubKey;
-    uint8_t charged = false;
+    uint32_t charged = false;
     eosio::string chargeData;
 
     void print() {
@@ -95,9 +96,8 @@ struct Request {
     }
 };
 
-using Requests = eosio::table<N(booking), N(booking), N(Requests), Request, Id, Id>;
+using Requests = eosio::table<N(booking), N(booking), N(request), Request, Id>;
 using RequestsById = Requests::primary_index;
-using RequestsByHotelId = Requests::secondary_index;
 
 
 
@@ -105,37 +105,49 @@ using RequestsByHotelId = Requests::secondary_index;
 
 struct Operation
 {
-    Id initiatorHotel;
+    HotelId initiatorId;
 
-    virtual void apply() = 0;
+    virtual void onApply(Hotel & initiator) {};
+    virtual void checkAuth(Hotel & initiator) {};
+
+    void apply() {
+        Hotel initiator;
+        assert(Hotels::get((HotelIdI64)initiatorId, initiator), "initiator hotel not found");
+
+        checkAuth(initiator);
+        onApply(initiator);
+    }
 };
 
 //@abi action CreateOffer
 struct CreateOffer : public Operation
 {
-    fixed_string32 roomInfo;
+    eosio::string roomInfo;
     time arrivalDate;
     Token price;
 
-    void apply() override;
+    void onApply(Hotel & initiator) override;
+    void checkAuth(Hotel & initiator) override;
 };
 
 //@abi action CreateReq
 struct CreateReq : public Operation
 {
     Id offerId;
-    public_key pubKey;
+    eosio::string pubKey;
 
-    void apply() override;
+    void onApply(Hotel & initiator) override;
+    void checkAuth(Hotel & initiator) override;
 };
 
 //@abi action ChargeRequest
 struct ChargeReq : public Operation
 {
     Id requestId;
-    fixed_string32 chargeData;
+    eosio::string chargeData;
 
-    void apply() override;
+    void onApply(Hotel & initiator) override;
+    void checkAuth(Hotel & initiator) override;
 };
 
 //@abi action RefundRequest
@@ -143,7 +155,8 @@ struct RefundReq : public Operation
 {
     Id requestId;
 
-    void apply() override;
+    void onApply(Hotel & initiator) override;
+    void checkAuth(Hotel & initiator) override;
 };
 
 } // namespace booking

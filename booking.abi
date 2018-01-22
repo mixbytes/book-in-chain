@@ -1,13 +1,13 @@
 {
-  "types": [],
-  "structs": [{
-      "name": "Id",
-      "base": "",
-      "fields": {
-        "owner": "account_name",
-        "number": "uint64"
-      }
+  "types": [{
+      "new_type_name": "HotelIdI64",
+      "type": "uint64"
     },{
+      "new_type_name": "HotelId",
+      "type": "uint32"
+    }
+  ],
+  "structs": [{
       "name": "Token",
       "base": "",
       "fields": {
@@ -17,20 +17,26 @@
       "name": "Hotel",
       "base": "",
       "fields": {
-        "id": "Id",
-        "id2": "uint128",
+        "id": "HotelIdI64",
+        "owner": "account_name",
         "balance": "Token",
-        "openOffers": "uint64",
-        "totalOffers": "uint64",
-        "openRequests": "uint64",
-        "totalRequests": "uint64"
+        "openOffers": "uint32",
+        "totalOffers": "uint32",
+        "openRequests": "uint32",
+        "totalRequests": "uint32"
+      }
+    },{
+      "name": "Id",
+      "base": "",
+      "fields": {
+        "hotelId": "HotelId",
+        "number": "uint32"
       }
     },{
       "name": "Offer",
       "base": "",
       "fields": {
         "id": "Id",
-        "hotelId": "Id",
         "roomInfo": "string",
         "arrivalDate": "time",
         "price": "Token"
@@ -42,20 +48,20 @@
         "id": "Id",
         "offerId": "Id",
         "pubKey": "string",
-        "charged": "uint8",
+        "charged": "uint32",
         "chargeData": "string"
       }
     },{
       "name": "Operation",
       "base": "",
       "fields": {
-        "initiatorHotel": "Id"
+        "initiatorId": "HotelId"
       }
     },{
       "name": "CreateOffer",
       "base": "Operation",
       "fields": {
-        "roomInfo": "fixed_string32",
+        "roomInfo": "string",
         "arrivalDate": "time",
         "price": "Token"
       }
@@ -64,14 +70,14 @@
       "base": "Operation",
       "fields": {
         "offerId": "Id",
-        "pubKey": "public_key"
+        "pubKey": "string"
       }
     },{
       "name": "ChargeReq",
       "base": "Operation",
       "fields": {
         "requestId": "Id",
-        "chargeData": "fixed_string32"
+        "chargeData": "string"
       }
     },{
       "name": "RefundReq",
@@ -97,37 +103,31 @@
   ],
   "tables": [{
       "table_name": "hotel",
-      "index_type": "i128i128",
+      "index_type": "i64",
       "key_names": [
-        "id",
-        "id2"
+        "id"
       ],
       "key_types": [
-        "Id",
-        "uint128"
+        "HotelIdI64"
       ],
       "type": "Hotel"
     },{
       "table_name": "offer",
-      "index_type": "i128i128",
+      "index_type": "i64",
       "key_names": [
-        "id",
-        "hotelId"
+        "id"
       ],
       "key_types": [
-        "Id",
         "Id"
       ],
       "type": "Offer"
     },{
       "table_name": "request",
-      "index_type": "i128i128",
+      "index_type": "i64",
       "key_names": [
-        "id",
-        "offerId"
+        "id"
       ],
       "key_types": [
-        "Id",
         "Id"
       ],
       "type": "Request"
