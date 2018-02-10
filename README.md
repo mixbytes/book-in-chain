@@ -4,7 +4,7 @@ Open research prototype of booking system, based on EOS blockchain engine
 ## build preparations
   install EOSIO dev tools&&programs (for ubuntu 16.xx):
   ``` bash
-  git clone https://github.com/eosio/eos --recursive
+  git clone https://github.com/eosio/eos -b dawn-2.x --recursive
   cd eos
   ./build.sh ubuntu
   cd build
