@@ -12,14 +12,17 @@ void CreateOffer::checkAuth(Account & initiator) {
 
 void CreateOffer::onApply(Account & initiator) {
     assert(initiator.isHotel, "only for hotels");
-    assert(roomInfo.get_size() > 0, "empty roomInfo");
+    assert(roomInfo != 0, "empty roomInfo");
     assert(arrivalDate > now(), "arrivalDate should be > now time");
+    //eosio::print("now(): ", now(), ", arrivalDate: ", arrivalDate, "\n");
     assert((bool)price, "price should be > 0");
+    //eosio::print("price: ", price, "\n");
 
     Offer newOffer;
     newOffer.roomInfo = roomInfo;
+
     newOffer.arrivalDate = arrivalDate;
-    newOffer.price = price;
+    newOffer.price.quantity = price;
 
     newOffer.id = { (AccountId)initiator.id, initiator.totalOffers++ };
     initiator.openOffers++;
@@ -27,7 +30,7 @@ void CreateOffer::onApply(Account & initiator) {
     Offers::store(newOffer);
     Accounts::update(initiator);
 
-    eosio::print("CreateOffer: ", newOffer);
+    eosio::print("CreateOffer: ", newOffer, "\n");
 }
 
 
@@ -43,7 +46,7 @@ void CreateReq::onApply(Account & initiator) {
 
     Request newRequest;
     newRequest.offerId = targetOffer.id;
-    newRequest.pubKey = pubKey;
+    newRequest.pubKey = { (char*)pubKey.data, sizeof(pubKey.data), true };
 
     newRequest.id = { (AccountId)initiator.id, initiator.totalRequests++ };
     initiator.openRequests++;
@@ -53,7 +56,7 @@ void CreateReq::onApply(Account & initiator) {
     initiator.balance -= targetOffer.price;
     Accounts::update(initiator);
 
-    eosio::print("CreateReq: ", newRequest);
+    eosio::print("CreateReq: ", newRequest, "\n");
 }
 
 
@@ -118,6 +121,13 @@ void RefundReq::onApply(Account & initiator) {
  *  call these methods.
  */
 
+#define APPLY(message) {\
+    booking::Account initiator; \
+    assert(booking::Accounts::get((booking::AccountIdI64)message.initiatorId, initiator), "initiator account not found"); \
+    message.checkAuth(initiator); \
+    message.onApply(initiator); \
+}
+
 extern "C" {
 
     /**
@@ -138,20 +148,20 @@ extern "C" {
     void apply( uint64_t code, uint64_t action ) {
         if (code == N(booking)) {
             switch (action) {
-            case N(CreateOffer):
-                eosio::current_message<booking::CreateOffer>().apply();
+            case N(createoffer):
+                APPLY(eosio::current_message<booking::CreateOffer>());
                 break;
-            case N(CreateReq):
-                eosio::current_message<booking::CreateReq>().apply();
+            case N(createreq):
+                APPLY(eosio::current_message<booking::CreateReq>());
                 break;
-            case N(ChargeReq):
-                eosio::current_message<booking::ChargeReq>().apply();
+            case N(chargereq):
+                APPLY(eosio::current_message<booking::ChargeReq>());
                 break;
-            case N(RefundReq):
-                eosio::current_message<booking::RefundReq>().apply();
+            case N(refundreq):
+                APPLY(eosio::current_message<booking::RefundReq>());
                 break;
             default:
-                eosio::print("unknown action: ", eosio::name(action));
+                eosio::print("unknown action: ", eosio::name(action), "\n");
             }
         }
         eosio::print( "apply: ", eosio::name(code), "->", eosio::name(action), "\n" );

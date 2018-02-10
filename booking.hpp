@@ -11,7 +11,7 @@
 namespace booking {
 
 
-using Token = eosio::token<uint64_t, N(Books)>;
+using Token = eosio::token<uint64_t, N(books)>;
 
 using AccountId = uint32_t;
 using AccountIdI64 = uint64_t;
@@ -65,7 +65,7 @@ struct Offer
 {
     Id id;
 
-    eosio::string roomInfo;
+    uint64_t roomInfo;
     time arrivalDate;
     Token price;
 
@@ -87,8 +87,8 @@ struct Request {
     Id offerId;
 
     eosio::string pubKey;
-    uint32_t charged = false;
-    eosio::string chargeData;
+    uint8_t charged = false;
+    uint128_t chargeData;
 
     void print() {
         eosio::print(   "{ id: ", id,
@@ -109,57 +109,55 @@ using RequestsById = Requests::primary_index;
 struct Operation
 {
     AccountId initiatorId;
-
-    virtual void onApply(Account & initiator) {};
-    virtual void checkAuth(Account & initiator) {};
-
-    void apply() {
-        Account initiator;
-        assert(Accounts::get((AccountIdI64)initiatorId, initiator), "initiator account not found");
-
-        checkAuth(initiator);
-        onApply(initiator);
-    }
 };
+
+static_assert(sizeof(Operation) == 4, "sizeof(Operation) != 4");
 
 //@abi action CreateOffer
-struct CreateOffer : public Operation
+struct PACKED(CreateOffer) : public Operation
 {
-    eosio::string roomInfo;
+    uint64_t roomInfo;
     time arrivalDate;
-    Token price;
+    uint64_t price;
 
-    void onApply(Account & initiator) override;
-    void checkAuth(Account & initiator) override;
+    void onApply(Account & initiator);
+    void checkAuth(Account & initiator);
 };
+
+static_assert(sizeof(CreateOffer) == 4 + 8 + 4 + 8, "sizeof(CreateOffer) != 24");
 
 //@abi action CreateReq
-struct CreateReq : public Operation
+struct PACKED(CreateReq) : public Operation
 {
     Id offerId;
-    eosio::string pubKey;
+    public_key pubKey;
 
-    void onApply(Account & initiator) override;
-    void checkAuth(Account & initiator) override;
+    void onApply(Account & initiator);
+    void checkAuth(Account & initiator);
 };
 
-//@abi action ChargeRequest
-struct ChargeReq : public Operation
+static_assert(sizeof(CreateReq) == 4 + 8 + 33, "sizeof(CreateReq) != 45");
+
+//@abi action ChargeReq
+struct PACKED(ChargeReq) : public Operation
 {
     Id requestId;
-    eosio::string chargeData;
+    uint128_t chargeData;
 
-    void onApply(Account & initiator) override;
-    void checkAuth(Account & initiator) override;
+    void onApply(Account & initiator);
+    void checkAuth(Account & initiator);
 };
 
-//@abi action RefundRequest
-struct RefundReq : public Operation
+static_assert(sizeof(ChargeReq) == 4 + 16 + 8, "sizeof(ChargeReq) != 20");
+
+//@abi action RefundReq
+struct PACKED(RefundReq) : public Operation
 {
     Id requestId;
 
-    void onApply(Account & initiator) override;
-    void checkAuth(Account & initiator) override;
+    void onApply(Account & initiator);
+    void checkAuth(Account & initiator);
 };
 
+static_assert(sizeof(RefundReq) == 4 + 8, "sizeof(RefundReq) != 12");
 } // namespace booking

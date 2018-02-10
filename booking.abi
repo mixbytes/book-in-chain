@@ -38,7 +38,7 @@
       "base": "",
       "fields": {
         "id": "Id",
-        "roomInfo": "string",
+        "roomInfo": "uint64",
         "arrivalDate": "time",
         "price": "Token"
       }
@@ -49,8 +49,8 @@
         "id": "Id",
         "offerId": "Id",
         "pubKey": "string",
-        "charged": "uint32",
-        "chargeData": "string"
+        "charged": "uint8",
+        "chargeData": "uint128"
       }
     },{
       "name": "Operation",
@@ -62,23 +62,23 @@
       "name": "CreateOffer",
       "base": "Operation",
       "fields": {
-        "roomInfo": "string",
+        "roomInfo": "uint64",
         "arrivalDate": "time",
-        "price": "Token"
+        "price": "uint64"
       }
     },{
       "name": "CreateReq",
       "base": "Operation",
       "fields": {
         "offerId": "Id",
-        "pubKey": "string"
+        "pubKey": "public_key"
       }
     },{
       "name": "ChargeReq",
       "base": "Operation",
       "fields": {
         "requestId": "Id",
-        "chargeData": "string"
+        "chargeData": "uint128"
       }
     },{
       "name": "RefundReq",
