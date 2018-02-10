@@ -124,8 +124,8 @@ extern "C" {
      */
     void init()  {
 
-        booking::Hotel hotel1 = { 1, N(inita), booking::Token(100) };
-        booking::Hotel hotel2 = { 2, N(initb), booking::Token(100) };
+        booking::Hotel hotel1 = { 1, N(inita), booking::Token(static_cast<uint64_t>(100)) };
+        booking::Hotel hotel2 = { 2, N(initb), booking::Token(static_cast<uint64_t>(100)) };
 
         booking::Hotels::store(hotel1);
         booking::Hotels::store(hotel2);
