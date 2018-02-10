@@ -16,7 +16,7 @@ using Token = eosio::token<uint64_t, N(books)>;
 using AccountId = uint32_t;
 using AccountIdI64 = uint64_t;
 
-struct Id
+struct PACKED(Id)
 {
     AccountId accountId;
     uint32_t number;
@@ -29,7 +29,7 @@ struct Id
 
 
 //@abi table i64
-struct Account
+struct PACKED(Account)
 {
     AccountIdI64 id;
 
@@ -61,7 +61,7 @@ using AccountsById = Accounts::primary_index;
 
 
 //@abi table i64
-struct Offer
+struct PACKED(Offer)
 {
     Id id;
 
@@ -82,7 +82,8 @@ using OffersById = Offers::primary_index;
 
 
 //@abi table i64
-struct Request {
+struct PACKED(Request)
+{
     Id id;
     Id offerId;
 
