@@ -1,9 +1,9 @@
 {
   "types": [{
-      "new_type_name": "HotelIdI64",
+      "new_type_name": "AccountIdI64",
       "type": "uint64"
     },{
-      "new_type_name": "HotelId",
+      "new_type_name": "AccountId",
       "type": "uint32"
     }
   ],
@@ -14,12 +14,13 @@
         "quantity": "uint64"
       }
     },{
-      "name": "Hotel",
+      "name": "Account",
       "base": "",
       "fields": {
-        "id": "HotelIdI64",
+        "id": "AccountIdI64",
         "owner": "account_name",
         "balance": "Token",
+        "isHotel": "uint8",
         "openOffers": "uint32",
         "totalOffers": "uint32",
         "openRequests": "uint32",
@@ -29,7 +30,7 @@
       "name": "Id",
       "base": "",
       "fields": {
-        "hotelId": "HotelId",
+        "accountId": "AccountId",
         "number": "uint32"
       }
     },{
@@ -55,7 +56,7 @@
       "name": "Operation",
       "base": "",
       "fields": {
-        "initiatorId": "HotelId"
+        "initiatorId": "AccountId"
       }
     },{
       "name": "CreateOffer",
@@ -102,15 +103,15 @@
     }
   ],
   "tables": [{
-      "table_name": "hotel",
+      "table_name": "account",
       "index_type": "i64",
       "key_names": [
         "id"
       ],
       "key_types": [
-        "HotelIdI64"
+        "AccountIdI64"
       ],
-      "type": "Hotel"
+      "type": "Account"
     },{
       "table_name": "offer",
       "index_type": "i64",

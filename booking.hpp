@@ -13,28 +13,30 @@ namespace booking {
 
 using Token = eosio::token<uint64_t, N(Books)>;
 
-using HotelId = uint32_t;
-using HotelIdI64 = uint64_t;
+using AccountId = uint32_t;
+using AccountIdI64 = uint64_t;
 
 struct Id
 {
-    HotelId hotelId;
+    AccountId accountId;
     uint32_t number;
 
     void print() {
-        eosio::print(   "{ hotelId: ", hotelId,
+        eosio::print(   "{ accountId: ", accountId,
                         ", number: ", number, " }");
     }
 };
 
 
 //@abi table i64
-struct Hotel
+struct Account
 {
-    HotelIdI64 id;
+    AccountIdI64 id;
 
     account_name owner;
     Token balance;
+
+    uint8_t isHotel = 0;
 
     uint32_t openOffers = 0u;
     uint32_t totalOffers = 0u;
@@ -46,6 +48,7 @@ struct Hotel
         eosio::print(   "{ id: ", id,
                         ", owner: ", owner,
                         ", balance: ", balance,
+                        ", isHotel: ", isHotel ? "true" : "false",
                         ", openOffers: ", openOffers,
                         ", totalOffers: ", totalOffers,
                         ", openRequests: ", openRequests,
@@ -53,8 +56,8 @@ struct Hotel
     }
 };
 
-using Hotels = eosio::table<N(booking), N(booking), N(hotel), Hotel, HotelIdI64>;
-using HotelsById = Hotels::primary_index;
+using Accounts = eosio::table<N(booking), N(booking), N(account), Account, AccountIdI64>;
+using AccountsById = Accounts::primary_index;
 
 
 //@abi table i64
@@ -105,14 +108,14 @@ using RequestsById = Requests::primary_index;
 
 struct Operation
 {
-    HotelId initiatorId;
+    AccountId initiatorId;
 
-    virtual void onApply(Hotel & initiator) {};
-    virtual void checkAuth(Hotel & initiator) {};
+    virtual void onApply(Account & initiator) {};
+    virtual void checkAuth(Account & initiator) {};
 
     void apply() {
-        Hotel initiator;
-        assert(Hotels::get((HotelIdI64)initiatorId, initiator), "initiator hotel not found");
+        Account initiator;
+        assert(Accounts::get((AccountIdI64)initiatorId, initiator), "initiator account not found");
 
         checkAuth(initiator);
         onApply(initiator);
@@ -126,8 +129,8 @@ struct CreateOffer : public Operation
     time arrivalDate;
     Token price;
 
-    void onApply(Hotel & initiator) override;
-    void checkAuth(Hotel & initiator) override;
+    void onApply(Account & initiator) override;
+    void checkAuth(Account & initiator) override;
 };
 
 //@abi action CreateReq
@@ -136,8 +139,8 @@ struct CreateReq : public Operation
     Id offerId;
     eosio::string pubKey;
 
-    void onApply(Hotel & initiator) override;
-    void checkAuth(Hotel & initiator) override;
+    void onApply(Account & initiator) override;
+    void checkAuth(Account & initiator) override;
 };
 
 //@abi action ChargeRequest
@@ -146,8 +149,8 @@ struct ChargeReq : public Operation
     Id requestId;
     eosio::string chargeData;
 
-    void onApply(Hotel & initiator) override;
-    void checkAuth(Hotel & initiator) override;
+    void onApply(Account & initiator) override;
+    void checkAuth(Account & initiator) override;
 };
 
 //@abi action RefundRequest
@@ -155,8 +158,8 @@ struct RefundReq : public Operation
 {
     Id requestId;
 
-    void onApply(Hotel & initiator) override;
-    void checkAuth(Hotel & initiator) override;
+    void onApply(Account & initiator) override;
+    void checkAuth(Account & initiator) override;
 };
 
 } // namespace booking
