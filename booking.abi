@@ -59,29 +59,29 @@
         "initiatorId": "AccountId"
       }
     },{
-      "name": "CreateOffer",
+      "name": "createoffer",
       "base": "Operation",
       "fields": {
-        "roomInfo": "uint64",
+        "roomInfo": "checksum",
         "arrivalDate": "time",
         "price": "uint64"
       }
     },{
-      "name": "CreateReq",
+      "name": "createreq",
       "base": "Operation",
       "fields": {
         "offerId": "Id",
         "pubKey": "public_key"
       }
     },{
-      "name": "ChargeReq",
+      "name": "chargereq",
       "base": "Operation",
       "fields": {
         "requestId": "Id",
         "chargeData": "uint128"
       }
     },{
-      "name": "RefundReq",
+      "name": "refundreq",
       "base": "Operation",
       "fields": {
         "requestId": "Id"
@@ -90,16 +90,16 @@
   ],
   "actions": [{
       "action_name": "createoffer",
-      "type": "CreateOffer"
+      "type": "createoffer"
     },{
       "action_name": "createreq",
-      "type": "CreateReq"
+      "type": "createreq"
     },{
       "action_name": "chargereq",
-      "type": "ChargeReq"
+      "type": "chargereq"
     },{
       "action_name": "refundreq",
-      "type": "RefundReq"
+      "type": "refundreq"
     }
   ],
   "tables": [{

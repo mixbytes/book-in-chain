@@ -114,10 +114,10 @@ struct Operation
 
 static_assert(sizeof(Operation) == 4, "sizeof(Operation) != 4");
 
-//@abi action CreateOffer
-struct PACKED(CreateOffer) : public Operation
+//@abi action createoffer
+struct PACKED(createoffer) : public Operation
 {
-    uint64_t roomInfo;
+    checksum roomInfo;
     time arrivalDate;
     uint64_t price;
 
@@ -125,10 +125,10 @@ struct PACKED(CreateOffer) : public Operation
     void checkAuth(Account & initiator);
 };
 
-static_assert(sizeof(CreateOffer) == 4 + 8 + 4 + 8, "sizeof(CreateOffer) != 24");
+static_assert(sizeof(createoffer) == 4 + 32 + 4 + 8, "sizeof(createoffer) != 24");
 
-//@abi action CreateReq
-struct PACKED(CreateReq) : public Operation
+//@abi action createreq
+struct PACKED(createreq) : public Operation
 {
     Id offerId;
     public_key pubKey;
@@ -137,10 +137,10 @@ struct PACKED(CreateReq) : public Operation
     void checkAuth(Account & initiator);
 };
 
-static_assert(sizeof(CreateReq) == 4 + 8 + 33, "sizeof(CreateReq) != 45");
+static_assert(sizeof(createreq) == 4 + 8 + 33, "sizeof(createreq) != 45");
 
-//@abi action ChargeReq
-struct PACKED(ChargeReq) : public Operation
+//@abi action chargereq
+struct PACKED(chargereq) : public Operation
 {
     Id requestId;
     uint128_t chargeData;
@@ -149,10 +149,10 @@ struct PACKED(ChargeReq) : public Operation
     void checkAuth(Account & initiator);
 };
 
-static_assert(sizeof(ChargeReq) == 4 + 16 + 8, "sizeof(ChargeReq) != 20");
+static_assert(sizeof(chargereq) == 4 + 16 + 8, "sizeof(chargereq) != 20");
 
-//@abi action RefundReq
-struct PACKED(RefundReq) : public Operation
+//@abi action refundreq
+struct PACKED(refundreq) : public Operation
 {
     Id requestId;
 
@@ -160,5 +160,5 @@ struct PACKED(RefundReq) : public Operation
     void checkAuth(Account & initiator);
 };
 
-static_assert(sizeof(RefundReq) == 4 + 8, "sizeof(RefundReq) != 12");
+static_assert(sizeof(refundreq) == 4 + 8, "sizeof(refundreq) != 12");
 } // namespace booking

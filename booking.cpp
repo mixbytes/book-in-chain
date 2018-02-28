@@ -6,20 +6,17 @@
 
 namespace booking {
 
-void CreateOffer::checkAuth(Account & initiator) {
+void createoffer::checkAuth(Account & initiator) {
     require_auth(initiator.owner);
 }
 
-void CreateOffer::onApply(Account & initiator) {
+void createoffer::onApply(Account & initiator) {
     assert(initiator.isHotel, "only for hotels");
-    assert(roomInfo != 0, "empty roomInfo");
     assert(arrivalDate > now(), "arrivalDate should be > now time");
-    //eosio::print("now(): ", now(), ", arrivalDate: ", arrivalDate, "\n");
     assert((bool)price, "price should be > 0");
-    //eosio::print("price: ", price, "\n");
 
     Offer newOffer;
-    newOffer.roomInfo = roomInfo;
+    memcpy(&newOffer.roomInfo, &roomInfo, sizeof(roomInfo));
 
     newOffer.arrivalDate = arrivalDate;
     newOffer.price.quantity = price;
@@ -30,15 +27,15 @@ void CreateOffer::onApply(Account & initiator) {
     Offers::store(newOffer);
     Accounts::update(initiator);
 
-    eosio::print("CreateOffer: ", newOffer, "\n");
+    eosio::print("createoffer: ", newOffer, "\n");
 }
 
 
-void CreateReq::checkAuth(Account & initiator) {
+void createreq::checkAuth(Account & initiator) {
     require_auth(initiator.owner);
 }
 
-void CreateReq::onApply(Account & initiator) {
+void createreq::onApply(Account & initiator) {
     Offer targetOffer;
     assert(Offers::get(offerId, targetOffer), "offer not found");
 
@@ -56,15 +53,15 @@ void CreateReq::onApply(Account & initiator) {
     initiator.balance -= targetOffer.price;
     Accounts::update(initiator);
 
-    eosio::print("CreateReq: ", newRequest, "\n");
+    eosio::print("createreq: ", newRequest, "\n");
 }
 
 
-void ChargeReq::checkAuth(Account & initiator) {
+void chargereq::checkAuth(Account & initiator) {
     require_auth(initiator.owner);
 }
 
-void ChargeReq::onApply(Account & initiator) {
+void chargereq::onApply(Account & initiator) {
     Request targetReq;
     assert(Requests::get(requestId, targetReq), "request not found");
     assert(!targetReq.charged, "request already charged");
@@ -84,11 +81,11 @@ void ChargeReq::onApply(Account & initiator) {
 }
 
 
-void RefundReq::checkAuth(Account & initiator) {
+void refundreq::checkAuth(Account & initiator) {
     require_auth(initiator.owner);
 }
 
-void RefundReq::onApply(Account & initiator) {
+void refundreq::onApply(Account & initiator) {
     Request targetReq;
     assert(Requests::get(requestId, targetReq), "request not found");
 
@@ -149,16 +146,16 @@ extern "C" {
         if (code == N(booking)) {
             switch (action) {
             case N(createoffer):
-                APPLY(eosio::current_message<booking::CreateOffer>());
+                APPLY(eosio::current_message<booking::createoffer>());
                 break;
             case N(createreq):
-                APPLY(eosio::current_message<booking::CreateReq>());
+                APPLY(eosio::current_message<booking::createreq>());
                 break;
             case N(chargereq):
-                APPLY(eosio::current_message<booking::ChargeReq>());
+                APPLY(eosio::current_message<booking::chargereq>());
                 break;
             case N(refundreq):
-                APPLY(eosio::current_message<booking::RefundReq>());
+                APPLY(eosio::current_message<booking::refundreq>());
                 break;
             default:
                 eosio::print("unknown action: ", eosio::name(action), "\n");
