@@ -114,6 +114,38 @@ struct Operation
 
 static_assert(sizeof(Operation) == 4, "sizeof(Operation) != 4");
 
+//@abi action newaccount
+struct PACKED(newaccount) : public Operation
+{
+    account_name owner;
+    AccountId id;
+
+    void apply(Account & initiator);
+    void auth(Account & initiator);
+};
+
+
+//@abi action transfer
+struct PACKED(transfer) : public Operation
+{
+    AccountId to;
+    Token quantity;
+
+    void apply(Account & initiator);
+    void auth(Account & initiator);
+};
+
+
+//@abi action sethotel
+struct PACKED(sethotel) : public Operation
+{
+    AccountId id;
+
+    void apply(Account & initiator);
+    void auth(Account & initiator);
+};
+
+
 //@abi action createoffer
 struct PACKED(createoffer) : public Operation
 {
@@ -121,8 +153,8 @@ struct PACKED(createoffer) : public Operation
     time arrivalDate;
     uint64_t price;
 
-    void onApply(Account & initiator);
-    void checkAuth(Account & initiator);
+    void apply(Account & initiator);
+    void auth(Account & initiator);
 };
 
 static_assert(sizeof(createoffer) == 4 + 32 + 4 + 8, "sizeof(createoffer) != 24");
@@ -133,8 +165,8 @@ struct PACKED(createreq) : public Operation
     Id offerId;
     public_key pubKey;
 
-    void onApply(Account & initiator);
-    void checkAuth(Account & initiator);
+    void apply(Account & initiator);
+    void auth(Account & initiator);
 };
 
 static_assert(sizeof(createreq) == 4 + 8 + 33, "sizeof(createreq) != 45");
@@ -145,8 +177,8 @@ struct PACKED(chargereq) : public Operation
     Id requestId;
     uint128_t chargeData;
 
-    void onApply(Account & initiator);
-    void checkAuth(Account & initiator);
+    void apply(Account & initiator);
+    void auth(Account & initiator);
 };
 
 static_assert(sizeof(chargereq) == 4 + 16 + 8, "sizeof(chargereq) != 20");
@@ -156,8 +188,8 @@ struct PACKED(refundreq) : public Operation
 {
     Id requestId;
 
-    void onApply(Account & initiator);
-    void checkAuth(Account & initiator);
+    void apply(Account & initiator);
+    void auth(Account & initiator);
 };
 
 static_assert(sizeof(refundreq) == 4 + 8, "sizeof(refundreq) != 12");

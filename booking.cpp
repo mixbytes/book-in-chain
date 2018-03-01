@@ -6,11 +6,66 @@
 
 namespace booking {
 
-void createoffer::checkAuth(Account & initiator) {
+void transfer::auth(Account & initiator)
+{
     require_auth(initiator.owner);
 }
 
-void createoffer::onApply(Account & initiator) {
+void transfer::apply(Account & initiator)
+{
+    assert((bool)quantity, "need positive quantity");
+    assert(initiator.balance >= quantity, "need balance > quantity");
+
+    Account toAcc;
+    assert(Accounts::get((AccountIdI64)to, toAcc), "reciever not found");
+
+    toAcc.balance += quantity;
+    initiator.balance -= quantity;
+
+    Accounts::store(toAcc);
+    Accounts::store(initiator);
+}
+
+void sethotel::auth(Account & initiator)
+{
+    require_auth(initiator.owner);
+    assert(initiator.owner == N(booking), "only booking can set hotel flag");
+}
+
+void sethotel::apply(Account & initiator)
+{
+    Account acc;
+    assert(Accounts::get((AccountIdI64)id, acc), "account not found");
+    assert(acc.isHotel == 0, "account is hotel alredy");
+
+    acc.isHotel = true;
+    Accounts::store(acc);
+}
+
+void newaccount::auth(Account & initiator)
+{
+    require_auth(initiator.owner);
+    assert(initiator.owner == N(booking), "only booking can create account");
+}
+
+void newaccount::apply(Account & initiator)
+{
+    Account newAcc;
+    assert(Accounts::get(id, newAcc), "account already exist");
+
+    newAcc.id = id;
+    newAcc.owner = owner;
+
+    Accounts::store(newAcc);
+}
+
+void createoffer::auth(Account & initiator)
+{
+    require_auth(initiator.owner);
+}
+
+void createoffer::apply(Account & initiator)
+{
     assert(initiator.isHotel, "only for hotels");
     assert(arrivalDate > now(), "arrivalDate should be > now time");
     assert((bool)price, "price should be > 0");
@@ -25,17 +80,19 @@ void createoffer::onApply(Account & initiator) {
     initiator.openOffers++;
 
     Offers::store(newOffer);
-    Accounts::update(initiator);
+    Accounts::store(initiator);
 
     eosio::print("createoffer: ", newOffer, "\n");
 }
 
 
-void createreq::checkAuth(Account & initiator) {
+void createreq::auth(Account & initiator)
+{
     require_auth(initiator.owner);
 }
 
-void createreq::onApply(Account & initiator) {
+void createreq::apply(Account & initiator)
+{
     Offer targetOffer;
     assert(Offers::get(offerId, targetOffer), "offer not found");
 
@@ -47,21 +104,24 @@ void createreq::onApply(Account & initiator) {
 
     newRequest.id = { (AccountId)initiator.id, initiator.totalRequests++ };
     initiator.openRequests++;
+    initiator.totalRequests++;
 
     Requests::store(newRequest);
 
     initiator.balance -= targetOffer.price;
-    Accounts::update(initiator);
+    Accounts::store(initiator);
 
     eosio::print("createreq: ", newRequest, "\n");
 }
 
 
-void chargereq::checkAuth(Account & initiator) {
+void chargereq::auth(Account & initiator)
+{
     require_auth(initiator.owner);
 }
 
-void chargereq::onApply(Account & initiator) {
+void chargereq::apply(Account & initiator)
+{
     Request targetReq;
     assert(Requests::get(requestId, targetReq), "request not found");
     assert(!targetReq.charged, "request already charged");
@@ -81,11 +141,13 @@ void chargereq::onApply(Account & initiator) {
 }
 
 
-void refundreq::checkAuth(Account & initiator) {
+void refundreq::auth(Account & initiator)
+{
     require_auth(initiator.owner);
 }
 
-void refundreq::onApply(Account & initiator) {
+void refundreq::apply(Account & initiator)
+{
     Request targetReq;
     assert(Requests::get(requestId, targetReq), "request not found");
 
@@ -121,8 +183,8 @@ void refundreq::onApply(Account & initiator) {
 #define APPLY(message) {\
     booking::Account initiator; \
     assert(booking::Accounts::get((booking::AccountIdI64)message.initiatorId, initiator), "initiator account not found"); \
-    message.checkAuth(initiator); \
-    message.onApply(initiator); \
+    message.auth(initiator); \
+    message.apply(initiator); \
 }
 
 extern "C" {
@@ -130,13 +192,11 @@ extern "C" {
     /**
      *  This method is called once when the contract is published or updated.
      */
-    void init()  {
+    void init() {
+        booking::Account booking;
 
-        booking::Account account1 = { 1, N(inita), booking::Token(static_cast<uint64_t>(100)), 1 };
-        booking::Account account2 = { 2, N(initb), booking::Token(static_cast<uint64_t>(100)) };
-
-        booking::Accounts::store(account1);
-        booking::Accounts::store(account2);
+        if (!booking::Accounts::get(0, booking))
+            booking::Accounts::store({ 0, N(booking), booking::Token(1000ull * 1000ull * 1000ull) });
 
         eosio::print( "Init Booking!\n" );
     }
@@ -145,6 +205,15 @@ extern "C" {
     void apply( uint64_t code, uint64_t action ) {
         if (code == N(booking)) {
             switch (action) {
+            case N(newaccount):
+                APPLY(eosio::current_message<booking::newaccount>());
+                break;
+            case N(transfer):
+                APPLY(eosio::current_message<booking::transfer>());
+                break;
+            case N(sethotel):
+                APPLY(eosio::current_message<booking::sethotel>());
+                break;
             case N(createoffer):
                 APPLY(eosio::current_message<booking::createoffer>());
                 break;

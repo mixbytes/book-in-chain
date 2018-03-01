@@ -59,6 +59,26 @@
         "initiatorId": "AccountId"
       }
     },{
+      "name": "newaccount",
+      "base": "Operation",
+      "fields": {
+        "owner": "account_name",
+        "id": "AccountId"
+      }
+    },{
+      "name": "transfer",
+      "base": "Operation",
+      "fields": {
+        "to": "AccountId",
+        "quantity": "Token"
+      }
+    },{
+      "name": "sethotel",
+      "base": "Operation",
+      "fields": {
+        "id": "AccountId"
+      }
+    },{
       "name": "createoffer",
       "base": "Operation",
       "fields": {
@@ -89,6 +109,15 @@
     }
   ],
   "actions": [{
+      "action_name": "newaccount",
+      "type": "newaccount"
+    },{
+      "action_name": "transfer",
+      "type": "transfer"
+    },{
+      "action_name": "sethotel",
+      "type": "sethotel"
+    },{
       "action_name": "createoffer",
       "type": "createoffer"
     },{
