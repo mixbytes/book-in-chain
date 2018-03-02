@@ -13,14 +13,13 @@ void transfer::auth(Account & initiator)
 
 void transfer::apply(Account & initiator)
 {
-    assert((bool)quantity, "need positive quantity");
-    assert(initiator.balance >= quantity, "need balance > quantity");
+    assert(initiator.balance >= Token(quantity), "need balance > quantity");
 
     Account toAcc;
     assert(Accounts::get((AccountIdI64)to, toAcc), "reciever not found");
 
-    toAcc.balance += quantity;
-    initiator.balance -= quantity;
+    toAcc.balance += Token(quantity);
+    initiator.balance -= Token(quantity);
 
     Accounts::store(toAcc);
     Accounts::store(initiator);
@@ -36,9 +35,9 @@ void sethotel::apply(Account & initiator)
 {
     Account acc;
     assert(Accounts::get((AccountIdI64)id, acc), "account not found");
-    assert(acc.isHotel == 0, "account is hotel alredy");
+    assert(acc.isHotel != set, "account is alredy setted");
 
-    acc.isHotel = true;
+    acc.isHotel = (bool)set;
     Accounts::store(acc);
 }
 
@@ -62,13 +61,12 @@ void newaccount::apply(Account & initiator)
 void createoffer::auth(Account & initiator)
 {
     require_auth(initiator.owner);
+    assert(initiator.isHotel, "only for hotels");
 }
 
 void createoffer::apply(Account & initiator)
 {
-    assert(initiator.isHotel, "only for hotels");
     assert(arrivalDate > now(), "arrivalDate should be > now time");
-    assert((bool)price, "price should be > 0");
 
     Offer newOffer;
     memcpy(&newOffer.roomInfo, &roomInfo, sizeof(roomInfo));
@@ -134,10 +132,10 @@ void chargereq::apply(Account & initiator)
     targetReq.chargeData = chargeData;
     targetReq.charged = true;
 
-    Requests::update(targetReq);
+    Requests::store(targetReq);
 
-    initiator.balance.quantity += assigneeOffer.price.quantity;
-    Accounts::update(initiator);
+    initiator.balance += assigneeOffer.price;
+    Accounts::store(initiator);
 }
 
 
@@ -160,16 +158,16 @@ void refundreq::apply(Account & initiator)
     Requests::remove(targetReq);
 
     if (!targetReq.charged) {
-        initiator.balance.quantity += assigneeOffer.price.quantity;
+        initiator.balance += assigneeOffer.price;
         initiator.openRequests--;
-        Accounts::update(initiator);
+        Accounts::store(initiator);
     }
 
     Account offerCreator;
     Accounts::get((AccountIdI64)assigneeOffer.id.accountId, offerCreator);
 
     offerCreator.openOffers--;
-    Accounts::update(offerCreator);
+    Accounts::store(offerCreator);
 }
 
 } //namespace booking

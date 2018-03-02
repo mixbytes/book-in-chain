@@ -124,26 +124,33 @@ struct PACKED(newaccount) : public Operation
     void auth(Account & initiator);
 };
 
+static_assert(sizeof(newaccount) == 16, "sizeof(newaccount) != 16");
+
 
 //@abi action transfer
 struct PACKED(transfer) : public Operation
 {
     AccountId to;
-    Token quantity;
+    uint64_t quantity;
 
     void apply(Account & initiator);
     void auth(Account & initiator);
 };
+
+static_assert(sizeof(transfer) == 16, "sizeof(transfer) != 16");
 
 
 //@abi action sethotel
 struct PACKED(sethotel) : public Operation
 {
     AccountId id;
+    uint8_t set;
 
     void apply(Account & initiator);
     void auth(Account & initiator);
 };
+
+static_assert(sizeof(sethotel) == 9, "sizeof(sethotel) != 9");
 
 
 //@abi action createoffer
@@ -159,6 +166,7 @@ struct PACKED(createoffer) : public Operation
 
 static_assert(sizeof(createoffer) == 4 + 32 + 4 + 8, "sizeof(createoffer) != 24");
 
+
 //@abi action createreq
 struct PACKED(createreq) : public Operation
 {
@@ -170,6 +178,7 @@ struct PACKED(createreq) : public Operation
 };
 
 static_assert(sizeof(createreq) == 4 + 8 + 33, "sizeof(createreq) != 45");
+
 
 //@abi action chargereq
 struct PACKED(chargereq) : public Operation
@@ -183,6 +192,7 @@ struct PACKED(chargereq) : public Operation
 
 static_assert(sizeof(chargereq) == 4 + 16 + 8, "sizeof(chargereq) != 20");
 
+
 //@abi action refundreq
 struct PACKED(refundreq) : public Operation
 {
@@ -193,4 +203,5 @@ struct PACKED(refundreq) : public Operation
 };
 
 static_assert(sizeof(refundreq) == 4 + 8, "sizeof(refundreq) != 12");
+
 } // namespace booking

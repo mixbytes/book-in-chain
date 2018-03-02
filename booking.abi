@@ -70,13 +70,14 @@
       "base": "Operation",
       "fields": {
         "to": "AccountId",
-        "quantity": "Token"
+        "quantity": "uint64"
       }
     },{
       "name": "sethotel",
       "base": "Operation",
       "fields": {
-        "id": "AccountId"
+        "id": "AccountId",
+        "set": "uint8"
       }
     },{
       "name": "createoffer",
