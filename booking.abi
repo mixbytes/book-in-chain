@@ -48,7 +48,7 @@
       "fields": {
         "id": "Id",
         "offerId": "Id",
-        "pubKey": "string",
+        "pubKey": "public_key",
         "charged": "uint8",
         "chargeData": "uint128"
       }

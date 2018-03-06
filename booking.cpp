@@ -50,7 +50,7 @@ void newaccount::auth(Account & initiator)
 void newaccount::apply(Account & initiator)
 {
     Account newAcc;
-    assert(Accounts::get(id, newAcc), "account already exist");
+    assert(!Accounts::get(id, newAcc), "account already exist");
 
     newAcc.id = id;
     newAcc.owner = owner;
@@ -98,11 +98,10 @@ void createreq::apply(Account & initiator)
 
     Request newRequest;
     newRequest.offerId = targetOffer.id;
-    newRequest.pubKey = { (char*)pubKey.data, sizeof(pubKey.data), true };
+    memcpy(&newRequest.pubKey, &pubKey, sizeof(pubKey));
 
     newRequest.id = { (AccountId)initiator.id, initiator.totalRequests++ };
     initiator.openRequests++;
-    initiator.totalRequests++;
 
     Requests::store(newRequest);
 
@@ -157,17 +156,11 @@ void refundreq::apply(Account & initiator)
 
     Requests::remove(targetReq);
 
-    if (!targetReq.charged) {
+    if (!targetReq.charged)
         initiator.balance += assigneeOffer.price;
-        initiator.openRequests--;
-        Accounts::store(initiator);
-    }
 
-    Account offerCreator;
-    Accounts::get((AccountIdI64)assigneeOffer.id.accountId, offerCreator);
-
-    offerCreator.openOffers--;
-    Accounts::store(offerCreator);
+    initiator.openRequests--;
+    Accounts::store(initiator);
 }
 
 } //namespace booking

@@ -87,14 +87,13 @@ struct PACKED(Request)
     Id id;
     Id offerId;
 
-    eosio::string pubKey;
+    public_key pubKey;
     uint8_t charged = false;
     uint128_t chargeData;
 
     void print() {
         eosio::print(   "{ id: ", id,
                         ", offerId: ", offerId,
-                        ", pub_key: ", pubKey,
                         ", charged: ", charged ? "true" : "false",
                         ", charge_data: ", chargeData, " }");
     }
