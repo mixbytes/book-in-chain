@@ -75,6 +75,7 @@ void createoffer::apply(Account & initiator)
     newOffer.price.quantity = price;
 
     newOffer.id = { (AccountId)initiator.id, initiator.totalOffers++ };
+    newOffer.deleted = 0;
     initiator.openOffers++;
 
     Offers::store(newOffer);
@@ -83,6 +84,23 @@ void createoffer::apply(Account & initiator)
     eosio::print("createoffer: ", newOffer, "\n");
 }
 
+void deleteoffer::auth(Account & initiator)
+{
+    require_auth(initiator.owner);
+}
+
+void deleteoffer::apply(Account & initiator)
+{
+    Offer offer;
+    assert(Offers::get(id, offer), "offer not found");
+    assert(offer.id.accountId == initiator.id, "only creator can delete offer");
+
+    initiator.openOffers--;
+    offer.deleted = true;
+
+    Offers::store(offer);
+    Accounts::store(initiator);
+}
 
 void createreq::auth(Account & initiator)
 {
@@ -207,6 +225,9 @@ extern "C" {
                 break;
             case N(createoffer):
                 APPLY(eosio::current_message<booking::createoffer>());
+                break;
+            case N(deleteoffer):
+                APPLY(eosio::current_message<booking::deleteoffer>());
                 break;
             case N(createreq):
                 APPLY(eosio::current_message<booking::createreq>());

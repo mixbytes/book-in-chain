@@ -68,12 +68,14 @@ struct PACKED(Offer)
     uint64_t roomInfo;
     time arrivalDate;
     Token price;
+    uint8_t deleted = 0;
 
     void print() {
         eosio::print(   "{ id: ", id,
                         ", roomInfo: ", roomInfo,
                         ", arrivalDate: ", arrivalDate,
-                        ", price: ", price, " }");
+                        ", price: ", price,
+                        ", deleted: ", deleted ? "true" : "false", " }");
     }
 };
 
@@ -164,6 +166,18 @@ struct PACKED(createoffer) : public Operation
 };
 
 static_assert(sizeof(createoffer) == 4 + 32 + 4 + 8, "sizeof(createoffer) != 24");
+
+
+//@abi action deleteoffer
+struct PACKED(deleteoffer) : public Operation
+{
+    Id id;
+
+    void apply(Account & initiator);
+    void auth(Account & initiator);
+};
+
+static_assert(sizeof(deleteoffer) == 4 + 8, "sizeof(deleteoffer) != 12");
 
 
 //@abi action createreq

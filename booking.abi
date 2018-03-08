@@ -40,7 +40,8 @@
         "id": "Id",
         "roomInfo": "uint64",
         "arrivalDate": "time",
-        "price": "Token"
+        "price": "Token",
+        "deleted": "uint8"
       }
     },{
       "name": "Request",
@@ -88,6 +89,12 @@
         "price": "uint64"
       }
     },{
+      "name": "deleteoffer",
+      "base": "Operation",
+      "fields": {
+        "id": "Id"
+      }
+    },{
       "name": "createreq",
       "base": "Operation",
       "fields": {
@@ -121,6 +128,9 @@
     },{
       "action_name": "createoffer",
       "type": "createoffer"
+    },{
+      "action_name": "deleteoffer",
+      "type": "deleteoffer"
     },{
       "action_name": "createreq",
       "type": "createreq"
