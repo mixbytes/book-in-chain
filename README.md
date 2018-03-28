@@ -2,21 +2,32 @@
 Open research prototype of booking system, based on EOS blockchain engine
 
 ## build preparations
-  install EOSIO dev tools&&programs (for ubuntu 16.xx):
+  Install EOSIO dev tools&&programs (for ubuntu 16.xx, install in $HOME):
   ``` bash
+  cd $HOME
   git clone https://github.com/eosio/eos -b dawn-2.x --recursive
   cd eos
   ./build.sh ubuntu
   cd build
   sudo make install
   ```
-  add ```export PATH=$PATH:$HOME/eos/build/install/bin``` to .bashrc and run ``` sourse $HOME/.bashrc ```
+  manually add line ```export PATH=$PATH:$HOME/eos/build/install/bin``` to ```.bashrc``` file
+  or execute 
+  ``` bash
+  # seeks string 'export PATH=$PATH:$HOME/eos/build/install/bin' in ~/.bashrc and adds it to the end of file if it's not found
+  grep -q -F 'export PATH=$PATH:$HOME/eos/build/install/bin' $HOME/.bashrc || echo 'export PATH=$PATH:$HOME/eos/build/install/bin' >> $HOME/.bashrc
+  ```
+  Then apply ~/.bashrc changes by executing 
+  ```
+  source $HOME/.bashrc
+  ```
   
 
-## build
+## build booking contract
   clone repo:
   ``` bash
   git clone https://github.com/mixbytes/book-in-chain
+  cd book-in-chain
   ```
   generate booking.abi file (if booking.hpp changed):
   ``` bash
@@ -26,16 +37,27 @@ Open research prototype of booking system, based on EOS blockchain engine
   ``` bash 
   eoscpp -o booking.wast booking.cpp
   ```
+  As result you should get ```booking.wast``` file
   
 ## start eos node
-  ``` bash
-  cd ~
-  sudo mkdir eos_data-dir
-  sudo cp book-in-chain/eos/config.ini eos_data_dir/
-  sudo cp eos/genesis.json eos_data_dir/
-  eosd -d eos_data_dir/ --skip-transaction-signatures
+  Set (and create if needed) the directory for EOS blockchain data. You can change it to suitable location, if needed
   ```
- 
+  EOS_DATA_DIR=/var/log/eos-data-dir
+  sudo mkdir -p $EOS_DATA_DIR
+  sudo chown ${USER:=$(/usr/bin/id -run)} $EOS_DATA_DIR
+  ```
+  Copying configuration file and genesis block
+  ```
+  cd $HOME
+  cp book-in-chain/config.ini $EOS_DATA_DIR/config.ini
+  cp eos/genesis.json $EOS_DATA_DIR/genesis.json
+  ```
+  run ```eosd``` daemon
+  ```
+  eosd -d $EOS_DATA_DIR --genesis-json=$EOS_DATA_DIR/genesis.json --skip-transaction-signatures
+  ```
+
+
 ## deploy
 ### create a wallet:
   ``` bash
