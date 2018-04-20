@@ -1,56 +1,46 @@
 /* eslint-env mocha */
 const assert = require('assert')
 
-const Eos = require('eosjs')
-const {ecc} = Eos.modules
-const {Keystore} = require('eosjs-keygen')
+const EOS = require('eosjs');
+const {ecc} = EOS.modules;
+const {Keystore} = require('eosjs-keygen');
 
-describe('version', () => {
-  it('exposes a version number', () => {
-    assert.ok(Eos.version)
-  })
-})
+const { conf } = require('./test.config.js');
 
-describe('offline', () => {
-  const headers = {
-    expiration: new Date().toISOString().split('.')[0],
-    region: 0,
-    ref_block_num: 1,
-    ref_block_prefix: 452435776,
-    context_free_cpu_bandwidth: 0,
-    packed_bandwidth_words: 0,
-    context_free_actions: []
-  }
 
-  it('transaction', async function() {
-    const privateKey = await ecc.unsafeRandomKey()
 
-    const eos = Eos.Localnet({
-      keyProvider: privateKey,
-      httpEndpoint: 'https://doesnotexist.example.org',
-      transactionHeaders: (expireInSeconds, callback) => {
-        callback(null/*error*/, headers)
-      },
-      broadcast: false,
-      sign: true
-    })
 
-    const memo = ''
-    const trx = await eos.transfer('bankers', 'people', '1000000 EOS', memo)
 
-    assert.deepEqual({
-      expiration: trx.transaction.data.expiration,
-      region: 0,
-      ref_block_num: trx.transaction.data.ref_block_num,
-      ref_block_prefix: trx.transaction.data.ref_block_prefix,
-      context_free_cpu_bandwidth: 0,
-      packed_bandwidth_words: 0,
-      context_free_actions: []
-    }, headers)
+async function bookingAction(action, key, params) {
+    params.initiatorId = +key.accountId;
 
-    assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
-  })
-})
+	const eos = EOS.Localnet({
+			keyProvider: key.privateKey,
+			httpEndpoint: 'http://127.0.0.1:8888', //conf.eosHttp,
+			broadcast: false,
+			sign: true
+	});
+
+    return eos.contract('booking')
+				.then(booking => {
+         			return booking[action](params, { authorization: key.owner + '@owner',
+ 					scope: 'booking'
+            	})
+            });
+
+}
+
+
+describe('test of booking', () => {
+
+
+  	it('transaction', async function() {
+    	const privateKey = await ecc.unsafeRandomKey();
+
+		let res = await bookingAction('createoffer', privateKey, {});
+
+	})
+});
 
 //Eos = require('eosjs') 
 

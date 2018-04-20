@@ -52,6 +52,12 @@ Open research prototype of booking system, based on EOS blockchain engine
   cp book-in-chain/config.ini $EOS_DATA_DIR/config.ini
   cp eos/genesis.json $EOS_DATA_DIR/genesis.json
   ```
+  Copying compiled contract files into working dir 
+  ```
+  cp book-in-chain/booking.wast $EOS_DATA_DIR/
+  cp book-in-chain/booking.abi $EOS_DATA_DIR/
+
+  ```
   run ```eosd``` daemon
   ```
   eosd -d $EOS_DATA_DIR --genesis-json=$EOS_DATA_DIR/genesis.json --skip-transaction-signatures
